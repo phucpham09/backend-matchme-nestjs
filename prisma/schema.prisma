@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,35 +8,34 @@ datasource db {
 }
 
 model Account {
-  id String  @id @default(cuid())
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? 
-  access_token      String? 
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? 
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
 model User {
   id              String    @id @default(cuid())
-  name            String?
   email           String?   @unique
+  name            String?
   emailVerified   DateTime?
-  passwordHash    String?
   image           String?
+  passwordHash    String?
   profileComplete Boolean   @default(false)
+  role            Role      @default(MEMBER)
   accounts        Account[]
   member          Member?
-  role            Role      @default(MEMBER)
 }
 
 model Member {
@@ -57,12 +50,12 @@ model Member {
   city              String
   country           String
   image             String?
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  photos            Photo[]
   sourceLikes       Like[]    @relation("source")
   targetLikes       Like[]    @relation("target")
-  senderMessages    Message[] @relation("sender")
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   recipientMessages Message[] @relation("recipient")
+  senderMessages    Message[] @relation("sender")
+  photos            Photo[]
 }
 
 model Photo {
@@ -76,8 +69,8 @@ model Photo {
 
 model Like {
   sourceUserId String
-  sourceMember Member @relation("source", fields: [sourceUserId], references: [userId], onDelete: Cascade)
   targetUserId String
+  sourceMember Member @relation("source", fields: [sourceUserId], references: [userId], onDelete: Cascade)
   targetMember Member @relation("target", fields: [targetUserId], references: [userId], onDelete: Cascade)
 
   @@id([sourceUserId, targetUserId])
@@ -89,11 +82,11 @@ model Message {
   created          DateTime  @default(now())
   senderId         String?
   recipientId      String?
-  sender           Member?   @relation("sender", fields: [senderId], references: [userId], onDelete: SetNull)
-  recipient        Member?   @relation("recipient", fields: [recipientId], references: [userId], onDelete: SetNull)
   dateRead         DateTime?
   senderDeleted    Boolean   @default(false)
   recipientDeleted Boolean   @default(false)
+  recipient        Member?   @relation("recipient", fields: [recipientId], references: [userId])
+  sender           Member?   @relation("sender", fields: [senderId], references: [userId])
 }
 
 model Token {
