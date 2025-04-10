@@ -16,7 +16,18 @@ export class AuthController {
     type: CreateUserDto,
     examples: {
       default: {
-        value: { name: 'user1', email: '1@gmail.com', passwordHash: '12345' },
+        value: {
+          name: 'user1',
+          email: '1@gmail.com',
+          passwordHash: '12345',
+          memberData: {
+            name: 'user1.',
+            gender: 'male',
+            dateOfBirth: '2003-09-07',
+            city: 'HaNoi',
+            country: 'Ecuador',
+          },
+        },
       },
     },
   })

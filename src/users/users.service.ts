@@ -2,16 +2,36 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-
+import { generateToken } from 'src/lib/generateToken';
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
   async create(createUserDto: CreateUserDto) {
-    const newUser = await this.prisma.user.create({
-      data: createUserDto,
-      select: { id: true, name: true, role: true, email: true },
+    const hashedPassword: string = await generateToken(
+      createUserDto.passwordHash,
+    );
+    return this.prisma.user.create({
+      data: {
+        email: createUserDto.email,
+        name: createUserDto.name,
+        passwordHash: hashedPassword,
+        profileComplete: !!createUserDto.memberData,
+        ...(createUserDto.memberData && {
+          member: {
+            create: {
+              name: createUserDto.memberData.name,
+              gender: createUserDto.memberData.gender,
+              dateOfBirth: new Date(createUserDto.memberData.dateOfBirth),
+              city: createUserDto.memberData.city,
+              country: createUserDto.memberData.country,
+              image: createUserDto.memberData.image,
+              description: '',
+            },
+          },
+        }),
+      },
+      select: { id: true, name: true, email: true, role: true },
     });
-    return newUser;
   }
 
   findAll() {
