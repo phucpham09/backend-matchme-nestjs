@@ -1,66 +1,55 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User } from '@prisma/client';
 
-describe('UsersService', () => {
-  let service: UsersService;
+describe('Test user service', () => {
   let prisma: PrismaService;
+  let userService: UsersService;
 
-  const mockUsers: User[] = [
+  const userArray = [
     {
       id: '1',
       name: 'user1',
       email: '1@gmail.com',
-      emailVerified: new Date(),
-      image: '',
-      passwordHash: 'asdfjskdfsdfasdf',
-      profileComplete: true,
-      role: 'MEMBER',
     },
     {
       id: '2',
       name: 'user2',
       email: '2@gmail.com',
-      emailVerified: new Date(),
-      image: '',
-      passwordHash: 'asdfjskdfsdfasdf',
-      profileComplete: true,
-      role: 'MEMBER',
     },
   ];
-  const mockPrismaService = {
+
+  const anUser = userArray[0];
+
+  const mockPrisma = {
     user: {
-      findMany: jest.fn().mockResolvedValue(mockUsers),
-      count: jest.fn().mockResolvedValue(mockUsers.length),
+      findUnique: jest.fn().mockResolvedValue(anUser),
+      findMany: jest.fn().mockResolvedValue(userArray),
     },
   };
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       providers: [
         UsersService,
         {
           provide: PrismaService,
-          useValue: mockPrismaService,
+          useValue: mockPrisma,
         },
       ],
     }).compile();
-
-    service = module.get<UsersService>(UsersService);
     prisma = module.get<PrismaService>(PrismaService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+    userService = module.get<UsersService>(UsersService);
   });
 
   describe('findAll', () => {
-    it('should return an array of users with total', async () => {
-      const result = await service.findAll(); // your service should wrap the result
-      expect(result).toEqual(mockUsers);
-      // expect(result.total).toEqual(mockUsers.length);
-      expect(prisma.user.findMany).toHaveBeenCalled();
-      // expect(prisma.user.count).toHaveBeenCalled();
+    it('Should be return an array', async () => {
+      expect(await userService.findAll()).toEqual(userArray);
+    });
+  });
+
+  describe('findOneUser', () => {
+    it('Should be return an user', async () => {
+      expect(await userService.findOne('an id')).toEqual(anUser);
     });
   });
 });
