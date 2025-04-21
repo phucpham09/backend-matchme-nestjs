@@ -43,13 +43,17 @@ describe('Test user service', () => {
 
   describe('findAll', () => {
     it('Should be return an array', async () => {
-      expect(await userService.findAll()).toEqual(userArray);
+      const result = await userService.findAll();
+      expect(prisma.user.findMany).toHaveBeenCalled();
+      expect(result).toEqual(userArray);
     });
   });
 
   describe('findOneUser', () => {
     it('Should be return an user', async () => {
-      expect(await userService.findOne('an id')).toEqual(anUser);
+      const result = await userService.findOne('an id');
+      expect(prisma.user.findUnique).toHaveBeenCalled();
+      expect(result).toEqual(anUser);
     });
   });
 });
